@@ -37,6 +37,14 @@
           - postgresql
           - 1password
           - solaar
+
+- name: User setup
+  hosts: localhost
+  connection: local
+  become: true
+  become_user: kunta
+
+  tasks:
     - name: Add the Flathub flatpak repository remote to the user installation
       community.general.flatpak_remote:
         name: flathub
@@ -47,16 +55,9 @@
       community.general.flatpak:
         method: user
         name:
-          - io.mpv.Mpv
           - app.devsuite.Ptyxis
-
-- name: User setup
-  hosts: localhost
-  connection: local
-  become: true
-  become_user: kunta
-
-  tasks:
+          - io.missioncenter.MissionCenter
+          - io.mpv.Mpv
     - name: Install asdf-vm
       ansible.builtin.git:
         repo: 'https://github.com/asdf-vm/asdf'
