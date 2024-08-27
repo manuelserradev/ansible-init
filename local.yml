@@ -1,0 +1,127 @@
+- name: Workstation setup
+  hosts: localhost
+  connection: local
+  become: true
+
+  tasks:
+    - name: Adding Microsoft rpm key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://packages.microsoft.com/keys/microsoft.asc
+    - name: Adding Visual Studio Code repository
+      ansible.builtin.yum_repository:
+        name: vscode-release
+        description: Visual Studio Code Updates
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        gpgcheck: true
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+    - name: Adding 1Password rpm key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://downloads.1password.com/linux/keys/1password.asc
+    - name: Adding 1Password repository
+      ansible.builtin.yum_repository:
+        name: 1password-release
+        description: 1Password Stable Channel
+        baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
+        gpgcheck: true
+        gpgkey: https://downloads.1password.com/linux/keys/1password.asc
+    - name: Install dependecies
+      ansible.builtin.dnf:
+        name:
+          - zsh
+          - code
+          - podman
+          - podman-docker
+          - podman-compose
+          - postgresql
+          - 1password
+          - solaar
+    - name: Add the Flathub flatpak repository remote to the user installation
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        method: user
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    - name: Install flatpaks
+      community.general.flatpak:
+        method: user
+        name:
+          - io.mpv.Mpv
+          - app.devsuite.Ptyxis
+
+- name: User setup
+  hosts: localhost
+  connection: local
+  become: true
+  become_user: kunta
+
+  tasks:
+    - name: Install asdf-vm
+      ansible.builtin.git:
+        repo: 'https://github.com/asdf-vm/asdf'
+        dest: ~/.asdf
+        version: v0.14.1
+    - name: Install oh-my-zsh
+      ansible.builtin.shell:
+        cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        creates: ~/.zshrc
+    - name: Install zsh-autosuggestions
+      ansible.builtin.git:
+        repo: 'https://github.com/zsh-users/zsh-autosuggestions'
+        dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+        version: v0.7.0
+    - name: Enable zsh plugins
+      ansible.builtin.lineinfile:
+        path: ~/.zshrc
+        regexp: '^plugins='
+        line: plugins=(git asdf zsh-autosuggestions)
+    - name: Enable Night Light
+      community.general.dconf:
+        key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
+        value: true
+    - name: Set Night Light Temperature
+      community.general.dconf:
+        key: "/org/gnome/settings-daemon/plugins/color/night-light-temperature"
+        value: uint32 3700
+    - name: Set custom keyboard shortcuts
+      community.general.dconf:
+        key: "{{ item.key }}"
+        value: "{{ item.value }}"
+      loop:
+        # Close window
+        - { key: '/org/gnome/desktop/wm/keybindings/close', value: "['<Super>q']" }
+        # Files
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name', value: "'Open Files'" }
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command', value: "'nautilus'" }
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding', value: "'<Super>e'" }
+        # Terminal
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/name', value: "'Open Terminal'" }
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/command', value: "'flatpak run app.devsuite.Ptyxis'" }
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/binding', value: "'<Super>t'" }
+        # Settings
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/name', value: "'Open Gnome Settings'" }
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/command', value: "'gnome-control-center'" }
+        - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/binding', value: "'<Super>i'" }
+    - name: Adding asdf-vm plugins
+      ansible.builtin.shell: "source ~/.asdf/asdf.sh && asdf plugin add {{ item.plugin_name }}"
+      args:
+        creates: "~/.asdf/plugins/{{ item.plugin_name }}"
+      loop:
+        - { plugin_name: 'java' }
+        - { plugin_name: 'maven' }
+        - { plugin_name: 'mvnd' }
+        - { plugin_name: 'nodejs' }
+        - { plugin_name: 'pnpm' }
+        - { plugin_name: 'yarn' }
+        - { plugin_name: 'azure-cli' }
+        - { plugin_name: 'stern' }
+        - { plugin_name: 'dapr' }
+    - name: Copy toolset configuration file
+      ansible.builtin.copy:
+        src: files/.tool-versions
+        dest: ~/.tool-versions
+        mode: u=rw,g=,o=
+    - name: Initialize toolset from file
+      changed_when: false
+      ansible.builtin.shell: "source ~/.asdf/asdf.sh && asdf install"
