@@ -92,6 +92,8 @@
       loop:
         # Close window
         - { key: '/org/gnome/desktop/wm/keybindings/close', value: "['<Super>q']" }
+        - { key: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-up', value: "['']" }
+        - { key: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-down', value: "['']" }
         # Files
         - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name', value: "'Open Files'" }
         - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command', value: "'nautilus'" }
