@@ -92,8 +92,13 @@
       loop:
         # Close window
         - { key: '/org/gnome/desktop/wm/keybindings/close', value: "['<Super>q']" }
+        # Navigation
         - { key: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-up', value: "['']" }
         - { key: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-down', value: "['']" }
+        - { key: '/org/gnome/desktop/wm/keybindings/move-to-workspace-up', value: "['']" }
+        - { key: '/org/gnome/desktop/wm/keybindings/move-to-workspace-down', value: "['']" }
+        - { key: '/org/gnome/desktop/wm/keybindings/move-to-workspace-left', value: "['<Super><Shift><Alt>Left']" }
+        - { key: '/org/gnome/desktop/wm/keybindings/move-to-workspace-right', value: "['<Super><Shift><Alt>Right']" }
         # Files
         - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name', value: "'Open Files'" }
         - { key: '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command', value: "'nautilus'" }
@@ -120,6 +125,7 @@
         - { plugin_name: 'azure-cli' }
         - { plugin_name: 'stern' }
         - { plugin_name: 'dapr' }
+        - { plugin_name: 'deno' }
     - name: Copy toolset configuration file
       ansible.builtin.copy:
         src: files/.tool-versions
