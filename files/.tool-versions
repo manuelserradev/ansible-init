@@ -6,3 +6,6 @@ pnpm 9.9.0
 yarn 1.22.22
 stern 1.30.0
 dapr 1.14.1
+azure-cli 2.64.0
+kubectl 1.31.0
+deno 2.0.1
