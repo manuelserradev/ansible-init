@@ -1,4 +1,4 @@
-- name: Workstation setup
+- name: Workstation setup (fedora)
   hosts: localhost
   connection: local
   become: true

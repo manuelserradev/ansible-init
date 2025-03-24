@@ -1,0 +1,66 @@
+- name: Workstation setup (macos)
+  hosts: localhost
+  connection: local
+  become: true
+
+  collections:
+    - name: geerlingguy.mac
+
+  vars:
+    homebrew_installed_packages:
+      - podman
+      - podman-compose
+      - zsh
+      - zsh-completions
+      - zsh-autosuggestions
+      - oh-my-posh
+      - asdf
+
+    homebrew_cask_apps:
+      - visual-studio-code
+      - 1password
+      - logi-options+
+      - intune-company-portal
+      - microsoft-teams
+      - rectangle
+      - ghostty
+      - raycast
+      - betterdisplay
+      - stats
+      - font-iosevka
+
+- name: User setup
+  hosts: localhost
+  connection: local
+  become: true
+  become_user: kunta
+
+  tasks:
+    - name: Enable zsh plugins
+      ansible.builtin.lineinfile:
+        path: ~/.zshrc
+        regexp: '^plugins='
+        line: plugins=(git asdf zsh-autosuggestions)
+    - name: Adding asdf-vm plugins
+      ansible.builtin.shell: "source ~/.asdf/asdf.sh && asdf plugin add {{ item.plugin_name }}"
+      args:
+        creates: "~/.asdf/plugins/{{ item.plugin_name }}"
+      loop:
+        - { plugin_name: 'java' }
+        - { plugin_name: 'maven' }
+        - { plugin_name: 'mvnd' }
+        - { plugin_name: 'nodejs' }
+        - { plugin_name: 'pnpm' }
+        - { plugin_name: 'yarn' }
+        - { plugin_name: 'azure-cli' }
+        - { plugin_name: 'stern' }
+        - { plugin_name: 'dapr' }
+        - { plugin_name: 'deno' }
+    - name: Copy toolset configuration file
+      ansible.builtin.copy:
+        src: files/.tool-versions
+        dest: ~/.tool-versions
+        mode: u=rw,g=,o=
+    - name: Initialize toolset from file
+      changed_when: false
+      ansible.builtin.shell: "source ~/.asdf/asdf.sh && asdf install"
