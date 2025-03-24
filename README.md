@@ -21,8 +21,11 @@ xcode-select --install
 # upgrade pip
 sudo pip3 install --upgrade pip
 
+# install homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
 # install ansible
-pip3 install ansible
+brew install ansible
 
 # clone this repo
 mkdir Workspace
@@ -30,6 +33,5 @@ cd Workspace
 git clone git@github.com:manuelserradev/ansible-init.git
 
 # run playbook
-ansible-galaxy install -r requirements.yml
 ansible-playbook macos.yml --ask-become-pass
 ```

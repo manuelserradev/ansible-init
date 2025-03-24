@@ -1,48 +1,60 @@
+---
 - name: Workstation setup (macos)
-  hosts: localhost
-  connection: local
-  become: true
-
-  collections:
-    - name: geerlingguy.mac
-
-  vars:
-    homebrew_installed_packages:
-      - podman
-      - podman-compose
-      - zsh
-      - zsh-completions
-      - zsh-autosuggestions
-      - oh-my-posh
-      - asdf
-
-    homebrew_cask_apps:
-      - visual-studio-code
-      - 1password
-      - logi-options+
-      - intune-company-portal
-      - microsoft-teams
-      - rectangle
-      - ghostty
-      - raycast
-      - betterdisplay
-      - stats
-      - font-iosevka
-
-- name: User setup
   hosts: localhost
   connection: local
   become: true
   become_user: kunta
 
   tasks:
+    - name: Install homebrew packages
+      community.general.homebrew:
+        update_homebrew: true
+        upgrade_all: true
+        name:
+          - gpg
+          - podman
+          - podman-compose
+          - zsh
+          - zsh-completions
+          - zsh-autosuggestions
+          - oh-my-posh
+          - asdf
+    - name: Install homebrew casks
+      community.general.homebrew_cask:
+        upgrade_all: true
+        name:
+          - visual-studio-code
+          - 1password
+          - logi-options+
+          - intune-company-portal
+          - microsoft-teams
+          - rectangle
+          - ghostty
+          - raycast
+          - betterdisplay
+          - stats
+          - font-iosevka
+    - name: Install oh-my-zsh
+      ansible.builtin.shell:
+        cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        creates: ~/.zshrc
+    - name: Install zsh-autosuggestions
+      ansible.builtin.git:
+        repo: 'https://github.com/zsh-users/zsh-autosuggestions'
+        dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+        version: v0.7.0
     - name: Enable zsh plugins
       ansible.builtin.lineinfile:
         path: ~/.zshrc
         regexp: '^plugins='
         line: plugins=(git asdf zsh-autosuggestions)
+    - name: Install asdf-vm
+      ansible.builtin.git:
+        repo: 'https://github.com/asdf-vm/asdf'
+        dest: ~/.asdf
+        version: v0.14.1
     - name: Adding asdf-vm plugins
-      ansible.builtin.shell: "source ~/.asdf/asdf.sh && asdf plugin add {{ item.plugin_name }}"
+      ansible.builtin.shell: "asdf plugin add {{ item.plugin_name }}"
       args:
         creates: "~/.asdf/plugins/{{ item.plugin_name }}"
       loop:
@@ -63,4 +75,4 @@
         mode: u=rw,g=,o=
     - name: Initialize toolset from file
       changed_when: false
-      ansible.builtin.shell: "source ~/.asdf/asdf.sh && asdf install"
+      ansible.builtin.shell: "asdf install"
