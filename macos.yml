@@ -8,8 +8,6 @@
   tasks:
     - name: Install homebrew packages
       community.general.homebrew:
-        update_homebrew: true
-        upgrade_all: true
         name:
           - gpg
           - podman
@@ -19,9 +17,9 @@
           - zsh-autosuggestions
           - oh-my-posh
           - asdf
+          - vim
     - name: Install homebrew casks
       community.general.homebrew_cask:
-        upgrade_all: true
         name:
           - visual-studio-code
           - 1password
@@ -29,11 +27,16 @@
           - intune-company-portal
           - microsoft-teams
           - rectangle
+          - alt-tab
           - ghostty
           - raycast
           - betterdisplay
           - stats
           - font-iosevka
+          - firefox
+          - google-chrome
+          - brave-browser
+          - microsoft-edge
     - name: Install oh-my-zsh
       ansible.builtin.shell:
         cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
