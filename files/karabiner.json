@@ -23,17 +23,16 @@
                         ]
                     },
                     {
-                        "description": "control + q",
-                        "enabled": false,
+                        "description": "control + l",
                         "manipulators": [
                             {
                                 "from": {
-                                    "key_code": "q",
+                                    "key_code": "l",
                                     "modifiers": { "mandatory": ["control"] }
                                 },
                                 "to": [
                                     {
-                                        "key_code": "q",
+                                        "key_code": "l",
                                         "modifiers": ["command"]
                                     }
                                 ],
