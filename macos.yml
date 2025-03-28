@@ -36,7 +36,14 @@
           - firefox
           - google-chrome
           - brave-browser
+          - zen-browser
           - microsoft-edge
+          - karabiner-elements
+    - name: Configure keybindings
+      ansible.builtin.copy:
+        src: files/karabiner.json
+        dest: ~/.config/karabiner
+        force: yes
     - name: Install oh-my-zsh
       ansible.builtin.shell:
         cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
