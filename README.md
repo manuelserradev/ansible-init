@@ -42,20 +42,12 @@ ansible-playbook macos.yml --ask-become-pass
 # install openSUSE
 wsl --install openSUSE-Tumbleweed
 
-# enter openSUSE
-wsl
-
-# upgrade release
-zypper dup
-
-# install mvp
-zypper install git ansible
+# upgrade release & install mvp
+sudo zypper --non-interactive dup && sudo zypper --non-interactive install git ansible
 
 # clone this repo
-mkdir ~/workspace
-cd ~/workspace
-git clone git@github.com:manuelserradev/ansible-init.git
+mkdir ~/workspace && git clone https://github.com/manuelserradev/ansible-init.git ~/workspace/ansible-init
 
 # run playbook
-ansible-playbook wsl-opensuse.yml --ask-become-pass
+cd ~/workspace/ansible-init && ansible-playbook wsl-opensuse.yml --ask-become-pass
 ```
