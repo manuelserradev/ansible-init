@@ -1,4 +1,4 @@
-- name: Workstation setup (fedora)
+- name: Workstation setup (wsl-opensuse)
   hosts: localhost
   connection: local
   become: true
@@ -22,7 +22,7 @@
           - postgresql
     - name: Change default shell to zsh
       ansible.builtin.user:
-        name: "{{ ansible_user_id }}"
+        name: kunta
         shell: /bin/zsh
 
 - name: User setup

@@ -35,3 +35,27 @@ git clone git@github.com:manuelserradev/ansible-init.git
 # run playbook
 ansible-playbook macos.yml --ask-become-pass
 ```
+
+## wsl
+
+```bash
+# install openSUSE
+wsl --install openSUSE-Tumbleweed
+
+# enter openSUSE
+wsl
+
+# upgrade release
+zypper dup
+
+# install mvp
+zypper install git ansible
+
+# clone this repo
+mkdir ~/workspace
+cd ~/workspace
+git clone git@github.com:manuelserradev/ansible-init.git
+
+# run playbook
+ansible-playbook wsl-opensuse.yml --ask-become-pass
+```
