@@ -1,0 +1,71 @@
+- name: Workstation setup (fedora)
+  hosts: localhost
+  connection: local
+  become: true
+
+  tasks:
+    - name: Install dependecies
+      ansible.builtin.package:
+        name:
+          - asdf
+          - git
+          - curl
+          - tar
+          - wget
+          - unzip
+          - jq
+          - curl
+          - zsh
+          - podman
+          - podman-docker
+          # - podman-compose
+          - postgresql
+    - name: Change default shell to zsh
+      ansible.builtin.user:
+        name: "{{ ansible_user_id }}"
+        shell: /bin/zsh
+
+- name: User setup
+  hosts: localhost
+  connection: local
+  become: true
+  become_user: kunta
+
+  tasks:
+    - name: Install oh-my-zsh
+      ansible.builtin.shell:
+        cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        creates: ~/.oh-my-zsh
+    - name: Install zsh-autosuggestions
+      ansible.builtin.git:
+        repo: 'https://github.com/zsh-users/zsh-autosuggestions'
+        dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+        version: v0.7.1
+    - name: Enable zsh plugins
+      ansible.builtin.lineinfile:
+        path: ~/.zshrc
+        regexp: '^plugins='
+        line: plugins=(git asdf zsh-autosuggestions)
+    - name: Adding asdf-vm plugins
+      ansible.builtin.shell: "asdf plugin add {{ item.plugin_name }}"
+      args:
+        creates: "~/.asdf/plugins/{{ item.plugin_name }}"
+      loop:
+        - { plugin_name: 'java' }
+        - { plugin_name: 'maven' }
+        - { plugin_name: 'mvnd' }
+        - { plugin_name: 'nodejs' }
+        - { plugin_name: 'pnpm' }
+        - { plugin_name: 'yarn' }
+        - { plugin_name: 'azure-cli' }
+        - { plugin_name: 'stern' }
+        - { plugin_name: 'dapr' }
+        - { plugin_name: 'deno' }
+    - name: Copy toolset configuration file
+      ansible.builtin.copy:
+        src: files/.tool-versions
+        dest: ~/.tool-versions
+        mode: u=rw,g=,o=
+    - name: Initialize toolset from file
+      changed_when: false
+      ansible.builtin.shell: "asdf install"
