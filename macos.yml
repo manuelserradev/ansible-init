@@ -34,12 +34,14 @@
           - betterdisplay
           - stats
           - font-iosevka
+          - font-iosevka-nerd-font
           - firefox
           - google-chrome
           - brave-browser
           - zen-browser
           - microsoft-edge
           - karabiner-elements
+          - whisky
     - name: Configure keybindings
       ansible.builtin.copy:
         src: files/karabiner.json
@@ -59,6 +61,11 @@
         path: ~/.zshrc
         regexp: '^plugins='
         line: plugins=(git asdf zsh-autosuggestions)
+    - name: Add oh-my-posh initialization to .zshrc
+      ansible.builtin.lineinfile:
+        path: ~/.zshrc
+        line: 'eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/amro.omp.json)"'
+        insertafter: EOF
     - name: Adding asdf-vm plugins
       ansible.builtin.shell: "asdf plugin add {{ item.plugin_name }}"
       args:
