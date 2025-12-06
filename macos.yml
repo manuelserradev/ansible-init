@@ -6,6 +6,11 @@
   become_user: kunta
 
   tasks:
+    - name: Create applications directory
+      ansible.builtin.file:
+        path: ~/Applications
+        state: directory
+        mode: u=rwx,g=rx,o=rx
     - name: Install homebrew packages
       community.general.homebrew:
         name:
@@ -15,36 +20,34 @@
           - zsh
           - zsh-completions
           - zsh-autosuggestions
-          - oh-my-posh
-          - asdf
+          - mise
           - vim
           - zlib
     - name: Install homebrew casks
       community.general.homebrew_cask:
         name:
           - visual-studio-code
-          - 1password
           - logi-options+
           - intune-company-portal
           - microsoft-teams
           - rectangle
           - alt-tab
-          - ghostty
           - raycast
           - betterdisplay
           - stats
           - font-iosevka
           - font-iosevka-nerd-font
-          - firefox
-          - google-chrome
-          - brave-browser
+          - font-commit-mono
+          - font-commit-mono-nerd-font
           - zen-browser
           - microsoft-edge
           - karabiner-elements
-          - whisky
+          - linearmouse
+      environment:
+        HOMEBREW_CASK_OPTS: "--appdir=$HOME/Applications"
     - name: Configure keybindings
       ansible.builtin.copy:
-        src: files/karabiner.json
+        src: .config/karabiner/karabiner.json
         dest: ~/.config/karabiner
         force: no
     - name: Install oh-my-zsh
@@ -55,40 +58,31 @@
       ansible.builtin.git:
         repo: 'https://github.com/zsh-users/zsh-autosuggestions'
         dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-        version: v0.7.0
+        version: v0.7.1
     - name: Enable zsh plugins
       ansible.builtin.lineinfile:
         path: ~/.zshrc
         regexp: '^plugins='
-        line: plugins=(git asdf zsh-autosuggestions)
-    - name: Add oh-my-posh initialization to .zshrc
-      ansible.builtin.lineinfile:
-        path: ~/.zshrc
-        line: 'eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/amro.omp.json)"'
-        insertafter: EOF
-    - name: Adding asdf-vm plugins
-      ansible.builtin.shell: "asdf plugin add {{ item.plugin_name }}"
-      args:
-        creates: "~/.asdf/plugins/{{ item.plugin_name }}"
-      loop:
-        - { plugin_name: 'java' }
-        - { plugin_name: 'maven' }
-        - { plugin_name: 'mvnd' }
-        - { plugin_name: 'nodejs' }
-        - { plugin_name: 'pnpm' }
-        - { plugin_name: 'yarn' }
-        - { plugin_name: 'azure-cli' }
-        - { plugin_name: 'kubectl' }
-        - { plugin_name: 'stern' }
-        - { plugin_name: 'dapr' }
-        - { plugin_name: 'deno' }
+        line: plugins=(git mise zsh-autosuggestions)
     - name: Copy toolset configuration file
       ansible.builtin.copy:
-        src: files/.tool-versions
-        dest: ~/.tool-versions
+        src: .config/mise/config.toml
+        dest: ~/.config/mise
         mode: u=rw,g=,o=
     - name: Initialize toolset from file
       changed_when: false
-      ansible.builtin.shell: "asdf install"
+      ansible.builtin.shell: "mise install"
     - name: Configure git credential helper
       ansible.builtin.shell: "git config --global credential.helper store"
+    - name: Configure Terminal.app
+      ansible.builtin.shell:
+        cmd: |
+          defaults write com.apple.Terminal "Default Window Settings" "Pro"
+          defaults write com.apple.Terminal "Startup Window Settings" "Pro"
+          /usr/libexec/PlistBuddy -c "Set :Window\ Settings:Pro:Font '{{ terminal_font }}'" ~/Library/Preferences/com.apple.Terminal.plist
+          /usr/libexec/PlistBuddy -c "Set :Window\ Settings:Pro:columnCount {{ terminal_columns }}" ~/Library/Preferences/com.apple.Terminal.plist
+          /usr/libexec/PlistBuddy -c "Set :Window\ Settings:Pro:rowCount {{ terminal_rows }}" ~/Library/Preferences/com.apple.Terminal.plist
+      vars:
+        terminal_font: "CommitMonoNerdFont-Bold 13"
+        terminal_columns: 220
+        terminal_rows: 50

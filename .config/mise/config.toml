@@ -1,0 +1,14 @@
+[tools]
+java = "lts"
+maven = "latest"
+
+nodejs = "lts"
+deno = "latest"
+pnpm = "latest"
+
+kubectl = "latest"
+stern = "latest"
+dapr = "latest"
+
+azure-cli = "latest"
+terraform = "latest"
