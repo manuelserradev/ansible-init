@@ -1,4 +1,4 @@
-# ansible-init
+# workstation-init
 
 Super skinny ansible playbooks to quickly configure dev workstations, with SDKs and tools provided by [asdf](https://asdf-vm.com/).
 
@@ -18,22 +18,20 @@ sudo ansible-pull --url https://github.com/manuelserradev/ansible-init
 # install command line tools
 xcode-select --install
 
-# upgrade pip
-sudo pip3 install --upgrade pip
-
 # install homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# install ansible
-brew install ansible
+# install task (task runner)
+brew install go-task/tap/go-task
 
 # clone this repo
 mkdir Workspace
 cd Workspace
 git clone git@github.com:manuelserradev/ansible-init.git
 
-# run playbook
-ansible-playbook macos.yml --ask-become-pass
+# run setup
+cd ansible-init
+task
 ```
 
 ## wsl

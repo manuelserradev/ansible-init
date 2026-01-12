@@ -1,0 +1,122 @@
+version: "3"
+
+tasks:
+  default:
+    desc: "Workstation setup (macOS)"
+    deps:
+      - brew-packages
+      - brew-casks
+      - configure-rectangle
+      - install-ohmyzsh
+      - install-zsh-autosuggestions
+      - enable-zsh-plugins
+      - copy-config-files
+      - mise-install
+      - git-configuration
+      - configure-dock
+      - configure-trackpad
+      - configure-alttab
+
+  brew-packages:
+    cmds:
+      - brew install --quiet gpg podman podman-compose zsh zsh-completions zsh-autosuggestions mise vim zlib
+
+  brew-casks:
+    cmds:
+      - brew install --cask --quiet
+          visual-studio-code
+          intune-company-portal
+          microsoft-teams
+          rectangle
+          alt-tab
+          ghostty
+          raycast
+          betterdisplay
+          stats
+          font-iosevka
+          font-iosevka-nerd-font
+          font-commit-mono
+          font-commit-mono-nerd-font
+          zen-browser
+          microsoft-edge
+          karabiner-elements
+          linearmouse
+
+  configure-rectangle:
+    deps:
+      - brew-casks
+    cmds:
+      - defaults write com.knollsoft.Rectangle allowAnyShortcut -bool true
+      - defaults write com.knollsoft.Rectangle alternateDefaultShortcuts -bool true
+      - defaults write com.knollsoft.Rectangle gapSize -int 10
+      - defaults write com.knollsoft.Rectangle launchOnLogin -bool true
+      - defaults write com.knollsoft.Rectangle subsequentExecutionMode -int 1
+      - defaults write com.knollsoft.Rectangle leftHalf -dict keyCode 123 modifierFlags 1048576
+      - defaults write com.knollsoft.Rectangle maximize -dict keyCode 126 modifierFlags 1048576
+      - defaults write com.knollsoft.Rectangle reflowTodo -dict keyCode 45 modifierFlags 786432
+      - defaults write com.knollsoft.Rectangle restore -dict keyCode 125 modifierFlags 1048576
+      - defaults write com.knollsoft.Rectangle rightHalf -dict keyCode 124 modifierFlags 1048576
+      - defaults write com.knollsoft.Rectangle toggleTodo -dict keyCode 11 modifierFlags 786432
+
+  copy-config-files:
+    cmds:
+      - mkdir -p "$HOME/.config"
+      - cp -r .config/* "$HOME/.config/"
+      - chmod 600 "$HOME/.config/mise/config.toml"
+
+  install-ohmyzsh:
+    deps:
+      - brew-packages
+    status:
+      - test -f "$HOME/.zshrc"
+    cmds:
+      - sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true
+
+  install-zsh-autosuggestions:
+    deps:
+      - install-ohmyzsh
+    status:
+      - test -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    cmds:
+      - mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
+      - git clone --branch v0.7.1 https://github.com/zsh-users/zsh-autosuggestions "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+
+  enable-zsh-plugins:
+    deps:
+      - install-ohmyzsh
+    status:
+      - grep -q 'plugins=(git mise zsh-autosuggestions)' "$HOME/.zshrc"
+    cmds:
+      - sed -i '' 's/^plugins=.*/plugins=(git mise zsh-autosuggestions)/' "$HOME/.zshrc"
+
+
+
+  mise-install:
+    deps:
+      - brew-packages
+    cmds:
+      - mise install python pipx
+      - mise install
+
+  git-configuration:
+    cmds:
+      - git config --global user.name "Manuel Serra"
+      - git config --global user.email "ma.serra@teamsystem.com"
+      - git config --global credential.helper store
+
+  configure-dock:
+    cmds:
+      - defaults write com.apple.dock tilesize -int 32
+
+  configure-trackpad:
+    cmds:
+      - defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+
+  configure-alttab:
+    deps:
+      - brew-casks
+    cmds:
+      - defaults write com.lwouis.alt-tab-macos appearanceSize -int 0
+      - defaults write com.lwouis.alt-tab-macos appearanceStyle -int 1
+      - defaults write com.lwouis.alt-tab-macos screenRecordingPermissionSkipped -bool true
+      - defaults write com.lwouis.alt-tab-macos updatePolicy -int 1

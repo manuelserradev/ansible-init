@@ -6,9 +6,14 @@ nodejs = "lts"
 deno = "latest"
 pnpm = "latest"
 
+opencode = "latest"
+
 kubectl = "latest"
 stern = "latest"
 dapr = "latest"
+
+python = "latest"
+pipx = "latest"
 
 azure-cli = "latest"
 terraform = "latest"
