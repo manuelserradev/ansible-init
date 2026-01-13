@@ -16,10 +16,11 @@ tasks:
       - configure-dock
       - configure-trackpad
       - configure-alttab
+      - configure-keyboard-shortcuts
 
   brew-packages:
     cmds:
-      - brew install --quiet gpg podman podman-compose zsh zsh-completions zsh-autosuggestions mise vim zlib
+      - brew install --quiet gpg podman podman-compose zsh zsh-completions zsh-autosuggestions mise vim zlib dockutil
 
   brew-casks:
     cmds:
@@ -89,8 +90,6 @@ tasks:
     cmds:
       - sed -i '' 's/^plugins=.*/plugins=(git mise zsh-autosuggestions)/' "$HOME/.zshrc"
 
-
-
   mise-install:
     deps:
       - brew-packages
@@ -105,8 +104,18 @@ tasks:
       - git config --global credential.helper store
 
   configure-dock:
+    deps:
+      - brew-packages
+      - brew-casks
     cmds:
       - defaults write com.apple.dock tilesize -int 32
+      - dockutil --remove all --no-restart
+      - dockutil --add /Applications/Zen.app --no-restart
+      - dockutil --add /Applications/Ghostty.app --no-restart
+      - dockutil --add /Applications/Visual\ Studio\ Code.app --no-restart
+      - dockutil --add /Applications/Microsoft\ Edge.app --no-restart
+      - dockutil --add /Applications/Microsoft\ Teams.app --no-restart
+      - killall Dock
 
   configure-trackpad:
     cmds:
@@ -119,4 +128,25 @@ tasks:
       - defaults write com.lwouis.alt-tab-macos appearanceSize -int 0
       - defaults write com.lwouis.alt-tab-macos appearanceStyle -int 1
       - defaults write com.lwouis.alt-tab-macos screenRecordingPermissionSkipped -bool true
+      - defaults write com.lwouis.alt-tab-macos spacesToShow -int 1
       - defaults write com.lwouis.alt-tab-macos updatePolicy -int 1
+
+  configure-keyboard-shortcuts:
+    desc: "Configure macOS keyboard shortcuts for Mission Control"
+    vars:
+      PLIST: "~/Library/Preferences/com.apple.symbolichotkeys.plist"
+      # modifierFlags 1572864 = Cmd (1048576) + Option (524288)
+      MODIFIERS: "1572864"
+    cmds:
+      # Move left a space: Cmd + Option + Left Arrow (keyCode 123)
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:79:enabled true" {{.PLIST}}
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:79:value:parameters:0 65535" {{.PLIST}}
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:79:value:parameters:1 123" {{.PLIST}}
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:79:value:parameters:2 {{.MODIFIERS}}" {{.PLIST}}
+      # Move right a space: Cmd + Option + Right Arrow (keyCode 124)
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:81:enabled true" {{.PLIST}}
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:81:value:parameters:0 65535" {{.PLIST}}
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:81:value:parameters:1 124" {{.PLIST}}
+      - /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:81:value:parameters:2 {{.MODIFIERS}}" {{.PLIST}}
+      # Apply changes
+      - /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
